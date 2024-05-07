@@ -8,42 +8,6 @@
 import SwiftUI
 
 
-//struct DayWeather: Codable, Hashable {
-//    let date: String
-//    let temperatureMax: Double
-//    let temperatureMin: Double
-//    let weatherCode: Int
-//    
-//    enum CodingKeys: String, CodingKey {
-//            case date = "time"
-//            case weatherCode = "weather_code"
-//            case temperatureMax = "temperature_2m_max"
-//            case temperatureMin = "temperature_2m_min"
-//        }
-//
-//}
-//
-//struct CityWeather: Codable {
-//    let dailyWeather: [DayWeather]
-//    
-//    enum CodingKeys: String, CodingKey {
-//            case dailyWeather = "daily"
-//        }
-//    
-//}
-//
-//
-//
-//class CityWeatherModel: ObservableObject {
-//    @Published var weatherData = [CityWeather]()
-//    
-//    func fetchData() async {
-//            guard let fetchedWeather: [CityWeather] = await WebService().downloadData(fromURL: "https://api.open-meteo.com/v1/forecast?latitude=37.323&longitude=-122.0322&current=temperature_2m,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min") else {return}
-//        print(fetchedWeather);
-//            weatherData = fetchedWeather
-//        }
-//}
-
 struct CurrentWeather: Codable {
     let time: String
     let temperature2m: Double
@@ -79,10 +43,32 @@ struct DailyData: Codable {
 }
 
 class CityWeatherModel: ObservableObject {
+    
+    var city: String = ""
+    
     @Published var weatherData: WeatherData?
     
+    var url = ""
+    
+    init(city: String) {
+        self.city = city
+    }
+    
+    
     func fetchData() async {
-        guard let url = URL(string: "https://api.open-meteo.com/v1/forecast?latitude=37.323&longitude=-122.0322&current=temperature_2m,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min") else { return }
+        
+        switch city {
+        case "Cupertino":
+            url = "https://api.open-meteo.com/v1/forecast?latitude=37.323&longitude=-122.0322&current=temperature_2m,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min"
+        case "Paris":
+            url = "https://api.open-meteo.com/v1/forecast?latitude=48.8534&longitude=2.3488&current=temperature_2m,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min"
+        case "Canberra":
+            url = "https://api.open-meteo.com/v1/forecast?latitude=-35.2835&longitude=149.1281&current=temperature_2m,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min"
+        default:
+            url = "https://api.open-meteo.com/v1/forecast?latitude=37.323&longitude=-122.0322&current=temperature_2m,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min"
+        }
+        
+        guard let url = URL(string: url) else { return }
         
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
